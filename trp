@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TrapBound // CCTV Broadcast</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08140B;--fg:#f8f8f8;--g:#2FAE5A;--r:#D63B3B}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:Inter}
+canvas,#fx{position:fixed;inset:0}
+#fx{pointer-events:none}
+.scan{position:absolute;inset:0;opacity:.42;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.16)0 1px,transparent 1px 4px);animation:scan 6s linear infinite}
+@keyframes scan{to{transform:translateY(18px)}}
+.sweep{position:absolute;inset:0;overflow:hidden}
+.sweep:after{content:"";position:absolute;left:0;width:100%;height:120px;background:linear-gradient(transparent,rgba(255,255,255,.08),transparent);animation:sweep 7s linear infinite}
+@keyframes sweep{from{top:-120px}to{top:100%}}
+.frame:before,.frame:after{content:"";position:absolute;inset:18px;border:1px solid rgba(255,255,255,.15)}
+.overlay{position:absolute;inset:0;padding:20px;font:14px monospace}
+.tl,.tr,.bl,.br{position:absolute}.tl{top:20px;left:24px}.tr{top:20px;right:24px;text-align:right}.bl{bottom:90px;left:24px}.br{bottom:90px;right:24px;text-align:right}
+.center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px}
+h1,h2{font-family:Cinzel;font-size:64px;letter-spacing:5px;margin:0}
+p{font-size:20px;opacity:.9;line-height:1.6}
+button{background:#0004;color:#fff;border:1px solid var(--g);padding:12px 18px;margin:6px;letter-spacing:2px}
+button:hover{background:#1d5}
+.controls{position:absolute;bottom:18px;left:50%;transform:translateX(-50%)}
+.slide{display:none}.slide.active{display:flex}
+.hazard{position:absolute;right:24px;top:90px;border:1px solid #ffffff22;padding:10px 14px;background:#0004;font:13px monospace;width:220px}
+.red{color:var(--r)}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="fx"><div class="scan"></div><div class="sweep"></div><div class="frame"></div></div>
+<div class="overlay">
+<div class="tl" id="camInfo">SYSTEM</div>
+<div class="tr" id="signal">SIGNAL ████████░░</div>
+<div class="bl">REC ●<br><span id="clock"></span></div>
+<div class="br" id="danger">DANGER LOW</div>
+<div class="hazard"><b>HAZARD SCANNER</b><div id="haz">Initializing...</div></div>
+</div>
+
+<div class="center slide active" id="boot">
+<div><h1>TRAPBOUND</h1><p>EXPEDITION SURVEILLANCE NETWORK ONLINE</p><button onclick="start()">WATCH BROADCAST</button></div>
+</div>
+
+<div class="center slide" id="zone">
+<div>
+<h2 id="title"></h2>
+<p id="desc"></p>
+</div>
+</div>
+
+<div class="controls" style="display:none" id="controls">
+<button onclick="cam(0)">CAM 01</button>
+<button onclick="cam(1)">CAM 02</button>
+<button onclick="cam(2)">CAM 03</button>
+<button onclick="cam(3)">CAM 04</button>
+</div>
+
+<script>
+const maps=[
+{name:"ZONE 01 — GRASSLANDS",danger:"LOW",desc:"Pressure plates • Falling platforms\\n'Safe ground is temporary.'"},
+{name:"ZONE 02 — OVERGROWN JUNGLE",danger:"MEDIUM",desc:"Hidden spikes • Swinging logs\\n'The path disappears behind you.'"},
+{name:"ZONE 03 — PLACEHOLDER",danger:"HIGH",desc:"Construction in progress\\n'Hazard systems still being calibrated.'"},
+{name:"ZONE 04 — PLACEHOLDER",danger:"EXTREME",desc:"Restricted testing area\\n'No complete traversal recorded.'"}
+];
+const hazards=["Spike Trap — 12m Ahead","Swinging Log — Active","Falling Platform — Armed","Dart Launcher — Ready","Clear Path"];
+function start(){boot.classList.remove("active");zone.classList.add("active");controls.style.display="block";cam(0);}
+function cam(i){
+document.body.animate([{filter:"brightness(2)"},{filter:"brightness(1)"}],{duration:120});
+title.textContent=maps[i].name;
+desc.innerHTML=maps[i].desc.replace("\\n","<br><br>");
+camInfo.textContent="CAM "+String(i+1).padStart(2,"0");
+danger.innerHTML="DANGER <span class='red'>"+maps[i].danger+"</span>";
+}
+setInterval(()=>clock.textContent=new Date().toLocaleTimeString(),1000);
+setInterval(()=>haz.textContent=hazards[Math.floor(Math.random()*hazards.length)],2200);
+
+const c=bg,ctx=c.getContext("2d");
+function rs(){c.width=innerWidth;c.height=innerHeight}
+rs();addEventListener("resize",rs);
+(function loop(){
+ctx.fillStyle="#08140B";ctx.fillRect(0,0,c.width,c.height);
+for(let i=0;i<180;i++){ctx.fillStyle="rgba(255,255,255,.03)";ctx.fillRect(Math.random()*c.width,Math.random()*c.height,1,1);}
+requestAnimationFrame(loop);
+})();
+setInterval(()=>{
+if(Math.random()<.6){
+fx.style.transform=`translate(${(Math.random()-.5)*6}px,${(Math.random()-.5)*4}px)`;
+setTimeout(()=>fx.style.transform="",80);
+}
+},3000);
+</script>
+</body></html>
